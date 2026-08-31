@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
+import { authService } from "@/services/authService";
 
 const registerSchema = z
   .object({
@@ -25,7 +26,6 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
 
   const {
@@ -44,25 +44,14 @@ export default function RegisterPage() {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       const { confirmPassword: _, ...payload } = values;
-      const response = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          phone: payload.phone || undefined,
-        }),
+      await authService.register({
+        ...payload,
+        phone: payload.phone || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Registration failed.");
-      }
-
-      await login(data.data.user.email, values.password);
-      router.push("/");
+      router.push("/login");
     } catch (error: any) {
-      setError("root", { message: error.message || "Registration failed." });
+      const message = error?.response?.data?.message || error.message || "Registration failed.";
+      setError("root", { message });
     }
   };
 

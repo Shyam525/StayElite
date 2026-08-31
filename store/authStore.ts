@@ -15,7 +15,7 @@ export type User = {
 interface AuthState {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
+  refreshTokenValue: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: User | null) => void;
@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       accessToken: null,
-      refreshToken: null,
+      refreshTokenValue: null,
       isAuthenticated: false,
       isLoading: false,
 
@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: response.user,
             accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
+            refreshTokenValue: response.refreshToken,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -58,12 +58,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        const { refreshToken } = get();
+        const { refreshTokenValue } = get();
         set({ isLoading: true });
 
         try {
-          if (refreshToken) {
-            await authService.logout(refreshToken);
+          if (refreshTokenValue) {
+            await authService.logout(refreshTokenValue);
           }
         } catch (error) {
           console.warn("Logout request failed, clearing local auth state anyway.", error);
@@ -71,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             accessToken: null,
-            refreshToken: null,
+            refreshTokenValue: null,
             isAuthenticated: false,
             isLoading: false,
           });
@@ -79,18 +79,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refreshToken: async () => {
-        const { refreshToken } = get();
+        const { refreshTokenValue } = get();
 
-        if (!refreshToken) {
-          set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+        if (!refreshTokenValue) {
+          set({ user: null, accessToken: null, refreshTokenValue: null, isAuthenticated: false });
           return null;
         }
 
         try {
-          const response = await authService.refreshToken(refreshToken);
+          const response = await authService.refreshToken(refreshTokenValue);
           set({
             accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
+            refreshTokenValue: response.refreshToken,
             user: response.user,
             isAuthenticated: true,
           });
@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             accessToken: null,
-            refreshToken: null,
+            refreshTokenValue: null,
             isAuthenticated: false,
           });
           throw error;
@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
+        refreshTokenValue: state.refreshTokenValue,
         isAuthenticated: state.isAuthenticated,
       }),
     }

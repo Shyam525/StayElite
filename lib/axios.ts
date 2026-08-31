@@ -34,11 +34,11 @@ api.interceptors.response.use(
         if (refreshed) {
           const { accessToken } = useAuthStore.getState();
 
-          if (originalRequest.headers) {
+          if (accessToken && originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           }
 
-          return api(originalRequest);
+          return api({ ...originalRequest, headers: { ...originalRequest.headers } });
         }
       } catch (refreshError) {
         console.warn("Token refresh failed", refreshError);
