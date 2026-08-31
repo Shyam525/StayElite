@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface ListingRepository extends JpaRepository<Listing, UUID> {
-    List<Listing> findByHostId(UUID hostId);
+    List<Listing> findByHost_Id(UUID hostId);
     List<Listing> findByCity(String city);
 }

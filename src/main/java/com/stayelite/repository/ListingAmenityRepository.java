@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface ListingAmenityRepository extends JpaRepository<ListingAmenity, ListingAmenityId> {
-    List<ListingAmenity> findByListingId(UUID listingId);
-    void deleteByListingId(UUID listingId);
+    List<ListingAmenity> findByListing_Id(UUID listingId);
+    void deleteByListing_Id(UUID listingId);
 }

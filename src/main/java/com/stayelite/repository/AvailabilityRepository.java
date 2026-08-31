@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
-    List<Availability> findByListingId(UUID listingId);
-    List<Availability> findByListingIdAndDateBetween(UUID listingId, LocalDate startDate, LocalDate endDate);
+    List<Availability> findByListing_Id(UUID listingId);
+    List<Availability> findByListing_IdAndDateBetween(UUID listingId, LocalDate startDate, LocalDate endDate);
 }
