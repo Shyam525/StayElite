@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/stayelite
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+
+server:
+  port: 8080
+
+jwt:
+  secret: "stayelite-super-secret-key-for-jwt-token-generation-2026"
+  access-token-expiration-ms: 900000
+  refresh-token-expiration-ms: 604800000
+
+app:
+  cors:
+    allowed-origins: "http://localhost:3000"
