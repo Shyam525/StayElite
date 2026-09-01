@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Loader2, MapPin, Star } from "lucide-react";
 import { getMyBookings, type BookingListItem } from "@/services/listingService";
@@ -10,5 +10,22 @@ export default function TripsPage() {
   const [reviewBooking, setReviewBooking] = useState<BookingListItem | null>(null);
   const [success, setSuccess] = useState(false);
   const { data: bookings, isLoading, isError, refetch } = useQuery({ queryKey: ["my-bookings", "COMPLETED"], queryFn: () => getMyBookings("COMPLETED") });
-  return <main className="mx-auto max-w-5xl pb-16"><div className="border-b border-slate-200 pb-8"><p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-600">Your journey</p><h1 className="mt-2 text-3xl font-semibold tracking-tight">Trips</h1><p className="mt-2 text-slate-500">Relive your stays and share what made them special.</p></div>{success && <div className="mt-6 rounded-2xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">Thanks for sharing your experience.</div>}{isLoading && <div className="mt-8 flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />Loading completed trips...</div>}{isError && <p className="mt-8 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">We couldn't load your trips right now.</p>}{!isLoading && !isError && !bookings?.length && <div className="mt-10 rounded-3xl border border-dashed border-slate-300 p-12 text-center"><MapPin className="mx-auto h-8 w-8 text-slate-300" /><h2 className="mt-4 font-semibold">No completed trips yet</h2><p className="mt-2 text-sm text-slate-500">Your finished stays will appear here when they are ready to review.</p></div>}<div className="mt-8 space-y-4">{bookings?.map((booking) => <article key={booking.id} className="flex flex-col justify-between gap-5 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"><div><h2 className="font-semibold">{booking.listingTitle}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-500"><CalendarDays className="h-4 w-4" />{booking.checkIn} to {booking.checkOut}</p><p className="mt-1 text-sm text-slate-500">Hosted by {booking.hostName}</p></div><button type="button" onClick={() => setReviewBooking(booking)} className="flex h-10 items-center justify-center gap-2 rounded-full border border-slate-900 px-5 text-sm font-semibold hover:bg-slate-950 hover:text-white"><Star className="h-4 w-4" />Write a review</button></article>)}</div>{reviewBooking && <ReviewModal bookingId={reviewBooking.id} listingTitle={reviewBooking.listingTitle} onClose={() => setReviewBooking(null)} onSuccess={() => { setReviewBooking(null); setSuccess(true); void refetch(); }} />}</main>;
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("booking") === "confirmed") setSuccess(true);
+  }, []);
+
+  return <main className="mx-auto max-w-5xl pb-16">
+    <div className="border-b border-slate-200 pb-8">
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-600">Your journey</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Trips</h1>
+      <p className="mt-2 text-slate-500">Relive your stays and share what made them special.</p>
+    </div>
+    {success && <div className="mt-6 rounded-2xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">🎉 Booking confirmed! Your trip is all set.</div>}
+    {isLoading && <div className="mt-8 flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" />Loading completed trips...</div>}
+    {isError && <p className="mt-8 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">We couldn&apos;t load your trips right now.</p>}
+    {!isLoading && !isError && !bookings?.length && <div className="mt-10 rounded-3xl border border-dashed border-slate-300 p-12 text-center"><MapPin className="mx-auto h-8 w-8 text-slate-300" /><h2 className="mt-4 font-semibold">No completed trips yet</h2><p className="mt-2 text-sm text-slate-500">Your finished stays will appear here when they are ready to review.</p></div>}
+    <div className="mt-8 space-y-4">{bookings?.map((booking) => <article key={booking.id} className="flex flex-col justify-between gap-5 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"><div><h2 className="font-semibold">{booking.listingTitle}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-500"><CalendarDays className="h-4 w-4" />{booking.checkIn} to {booking.checkOut}</p><p className="mt-1 text-sm text-slate-500">Hosted by {booking.hostName}</p></div><button type="button" onClick={() => setReviewBooking(booking)} className="flex h-10 items-center justify-center gap-2 rounded-full border border-slate-900 px-5 text-sm font-semibold hover:bg-slate-950 hover:text-white"><Star className="h-4 w-4" />Write a review</button></article>)}</div>
+    {reviewBooking && <ReviewModal bookingId={reviewBooking.id} listingTitle={reviewBooking.listingTitle} onClose={() => setReviewBooking(null)} onSuccess={() => { setReviewBooking(null); setSuccess(true); void refetch(); }} />}
+  </main>;
 }

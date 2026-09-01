@@ -132,10 +132,31 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new IllegalArgumentException("Only pending bookings can be confirmed");
         }
+        if (!"PAID".equals(booking.getPaymentStatus())) {
+            throw new IllegalArgumentException("Booking can only be confirmed after payment succeeds");
+        }
         ensureAvailable(booking.getListing(), booking.getCheckIn(), booking.getCheckOut());
         booking.setStatus(BookingStatus.CONFIRMED);
         setDatesUnavailable(booking);
         return toResponse(bookingRepository.save(booking));
+    }
+
+    @Transactional
+    public void confirmAfterPayment(UUID bookingId, String paymentIntentId) {
+        Booking booking = findBooking(bookingId);
+        if (booking.getStripePaymentIntentId() != null && !paymentIntentId.equals(booking.getStripePaymentIntentId())) {
+            throw new IllegalArgumentException("Payment intent does not match booking");
+        }
+        if (booking.getStatus() == BookingStatus.CONFIRMED && "PAID".equals(booking.getPaymentStatus())) return;
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalArgumentException("Only pending bookings can be paid");
+        }
+        ensureAvailable(booking.getListing(), booking.getCheckIn(), booking.getCheckOut());
+        booking.setStripePaymentIntentId(paymentIntentId);
+        booking.setPaymentStatus("PAID");
+        booking.setStatus(BookingStatus.CONFIRMED);
+        setDatesUnavailable(booking);
+        bookingRepository.save(booking);
     }
 
     private PricingBreakdownResponse calculatePricing(Listing listing, LocalDate checkIn, LocalDate checkOut) {
@@ -240,6 +261,8 @@ public class BookingService {
                 .cleaningFee(booking.getCleaningFee())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
+                .stripePaymentIntentId(booking.getStripePaymentIntentId())
+                .paymentStatus(booking.getPaymentStatus())
                 .createdAt(booking.getCreatedAt())
                 .updatedAt(booking.getUpdatedAt())
                 .build();

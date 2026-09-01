@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.env*
+target
+coverage
+*.log
+README.md
+SETUP_GUIDE.md

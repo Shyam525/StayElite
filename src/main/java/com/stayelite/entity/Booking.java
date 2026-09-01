@@ -61,6 +61,13 @@ public class Booking {
     @Builder.Default
     private BookingStatus status = BookingStatus.PENDING;
 
+    @Column(name = "stripe_payment_intent_id", unique = true)
+    private String stripePaymentIntentId;
+
+    @Column(name = "payment_status", nullable = false)
+    @Builder.Default
+    private String paymentStatus = "UNPAID";
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

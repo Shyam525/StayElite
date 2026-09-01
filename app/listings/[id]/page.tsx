@@ -57,7 +57,7 @@ export default function ListingDetailPage() {
   const onRangeChange = (ranges: RangeKeyDict) => { const selected = ranges.selection; if (selected.startDate && selected.endDate) setRange({ startDate: selected.startDate, endDate: selected.endDate, key: "selection" }); };
   const reserve = async () => {
     setReserving(true); setReserveError("");
-    try { await createBooking({ listingId: params.id, checkIn: format(range.startDate, "yyyy-MM-dd"), checkOut: format(range.endDate, "yyyy-MM-dd"), guestsCount: guests }); router.push("/bookings?reserved=1"); }
+    try { const booking = await createBooking({ listingId: params.id, checkIn: format(range.startDate, "yyyy-MM-dd"), checkOut: format(range.endDate, "yyyy-MM-dd"), guestsCount: guests }); router.push(`/bookings/${booking.id}/payment`); }
     catch (error) { setReserveError(error instanceof Error ? error.message : "We couldn't reserve this stay yet."); }
     finally { setReserving(false); }
   };

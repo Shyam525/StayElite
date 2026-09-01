@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/stayelite
-    username: postgres
-    password: postgres
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/stayelite}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -19,18 +19,32 @@ spring:
     baseline-on-migrate: true
 
   redis:
-    host: localhost
-    port: 6379
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
     timeout: 2000ms
 
 server:
   port: 8080
 
 jwt:
-  secret: "stayelite-super-secret-key-for-jwt-token-generation-2026"
+  secret: ${JWT_SECRET:change-me-in-production}
   access-token-expiration-ms: 900000
   refresh-token-expiration-ms: 604800000
 
 app:
   cors:
-    allowed-origins: "http://localhost:3000"
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

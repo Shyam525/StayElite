@@ -31,6 +31,8 @@ public class BookingResponse {
     private BigDecimal cleaningFee;
     private BigDecimal totalAmount;
     private BookingStatus status;
+    private String stripePaymentIntentId;
+    private String paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
