@@ -80,6 +80,19 @@ export async function createBooking(payload: CreateBookingPayload) {
   return response.data?.data ?? response.data;
 }
 
+export type PricingBreakdownResponse = {
+  baseAmount: number;
+  serviceFee: number;
+  cleaningFee: number;
+  total: number;
+  nights: number;
+};
+
+export async function previewBooking(payload: CreateBookingPayload): Promise<PricingBreakdownResponse> {
+  const response = await api.get("/bookings/preview", { params: payload });
+  return response.data?.data ?? response.data;
+}
+
 export async function uploadListingPhotos(listingId: string, files: File[]) {
   const formData = new FormData();
   files.forEach((file) => formData.append("files", file));

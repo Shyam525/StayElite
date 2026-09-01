@@ -13,7 +13,7 @@ import {
   Wifi, X, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createBooking, getListing, type ListingDetail, type ListingReview } from "@/services/listingService";
+import { createBooking, getListing, previewBooking, type ListingDetail, type ListingReview } from "@/services/listingService";
 import { useStayEliteStore } from "@/store/useStayEliteStore";
 
 const amenityNames: Record<number, string> = { 1: "WiFi", 2: "Pool", 3: "Kitchen", 4: "Parking", 5: "AC", 6: "Gym", 7: "Hot Tub", 8: "Pet Friendly", 9: "Workspace" };
@@ -41,11 +41,12 @@ export default function ListingDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
 
   const images = listing?.photoUrls?.length ? listing.photoUrls.map(imageUrl) : placeholderImages;
+  const { data: pricing } = useQuery({ queryKey: ["booking-preview", params.id, range.startDate.toISOString(), range.endDate.toISOString(), guests], queryFn: () => previewBooking({ listingId: params.id, checkIn: format(range.startDate, "yyyy-MM-dd"), checkOut: format(range.endDate, "yyyy-MM-dd"), guestsCount: guests }), enabled: Boolean(listing) && guests <= (listing?.maxGuests || 0), retry: false });
   const nights = Math.max(1, differenceInCalendarDays(range.endDate, range.startDate));
   const nightly = Number(listing?.basePricePerNight || 0);
   const cleaning = Number(listing?.cleaningFee || 0);
   const serviceFee = Math.round((nightly * nights + cleaning) * 0.12);
-  const total = nightly * nights + cleaning + serviceFee;
+  const total = Number(pricing?.total ?? nightly * nights + cleaning + serviceFee);
   const amenities = listing?.amenities?.length ? listing.amenities : (listing?.amenityIds || []).map((id) => amenityNames[id] || `Amenity ${id}`);
   const reviews = listing?.reviews || [];
   const blocked = new Set(listing?.blockedDates || []);
