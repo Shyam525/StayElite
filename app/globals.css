@@ -216,6 +216,18 @@ body {
 }
 
 @layer components {
+  .search-segment {
+    @apply flex min-h-14 items-center gap-3 rounded-2xl px-4 text-sm text-slate-900 transition hover:bg-slate-50 md:rounded-full;
+  }
+
+  .search-segment small {
+    @apply mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500;
+  }
+
+  .round-control {
+    @apply flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:border-slate-950 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
   .eyebrow {
     @apply text-xs font-bold uppercase tracking-[0.2em] text-rose-600;
   }

@@ -58,6 +58,16 @@ export async function getListing(id: string): Promise<ListingDetail> {
   return response.data?.data ?? response.data;
 }
 
+export type ListingSearchParams = {
+  city?: string; checkIn?: string; checkOut?: string; guests?: number; minPrice?: number;
+  maxPrice?: number; propertyType?: string; page?: number; size?: number;
+};
+
+export async function searchListings(params: ListingSearchParams) {
+  const response = await api.get("/listings", { params });
+  return response.data?.data ?? response.data;
+}
+
 export type CreateBookingPayload = {
   listingId: string;
   checkIn: string;
