@@ -214,3 +214,21 @@ body {
     @apply font-sans;
   }
 }
+
+@layer components {
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-rose-600;
+  }
+
+  .field-label {
+    @apply flex flex-col text-sm font-semibold text-slate-800;
+  }
+
+  .field-input {
+    @apply mt-2 min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10;
+  }
+
+  .stepper-button {
+    @apply flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:border-slate-950 hover:bg-slate-950 hover:text-white;
+  }
+}
