@@ -50,6 +50,7 @@ export type ListingReview = {
   locationRating?: number;
   valueRating?: number;
   comment: string;
+  date?: string;
   createdAt: string;
 };
 
@@ -90,6 +91,46 @@ export type PricingBreakdownResponse = {
 
 export async function previewBooking(payload: CreateBookingPayload): Promise<PricingBreakdownResponse> {
   const response = await api.get("/bookings/preview", { params: payload });
+  return response.data?.data ?? response.data;
+}
+
+export type ReviewCreatePayload = {
+  bookingId: string;
+  overallRating: number;
+  cleanlinessRating: number;
+  locationRating: number;
+  valueRating: number;
+  comment: string;
+};
+
+export async function createReview(payload: ReviewCreatePayload) {
+  const response = await api.post("/reviews", payload);
+  return response.data?.data ?? response.data;
+}
+
+export async function getReviewSummary(listingId: string) {
+  const response = await api.get(`/reviews/listing/${listingId}/summary`);
+  return response.data?.data ?? response.data;
+}
+
+export async function getListingReviews(listingId: string) {
+  const response = await api.get(`/reviews/listing/${listingId}`, { params: { size: 20, sort: "createdAt,desc" } });
+  return response.data?.data ?? response.data;
+}
+
+export type BookingListItem = {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  hostName: string;
+  checkIn: string;
+  checkOut: string;
+  totalAmount: number;
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+};
+
+export async function getMyBookings(status?: string): Promise<BookingListItem[]> {
+  const response = await api.get("/bookings/my", { params: status ? { status } : undefined });
   return response.data?.data ?? response.data;
 }
 

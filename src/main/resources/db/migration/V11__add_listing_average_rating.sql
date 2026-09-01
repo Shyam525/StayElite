@@ -1,0 +1,2 @@
+ALTER TABLE listings
+    ADD COLUMN average_rating DECIMAL(3, 2) NOT NULL DEFAULT 0;

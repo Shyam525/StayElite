@@ -72,6 +72,10 @@ public class Listing {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "average_rating", nullable = false, precision = 3, scale = 2)
+    @Builder.Default
+    private BigDecimal averageRating = BigDecimal.ZERO;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
