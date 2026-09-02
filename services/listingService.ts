@@ -61,7 +61,7 @@ export async function getListing(id: string): Promise<ListingDetail> {
 
 export type ListingSearchParams = {
   city?: string; checkIn?: string; checkOut?: string; guests?: number; minPrice?: number;
-  maxPrice?: number; propertyType?: string; page?: number; size?: number;
+  maxPrice?: number; propertyType?: string; propertyTypes?: string[]; bedrooms?: number; amenities?: number[]; swLat?: number; swLng?: number; neLat?: number; neLng?: number; page?: number; size?: number;
 };
 
 export async function searchListings(params: ListingSearchParams) {

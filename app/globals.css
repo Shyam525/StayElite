@@ -228,6 +228,18 @@ body {
     @apply flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:border-slate-950 disabled:cursor-not-allowed disabled:opacity-40;
   }
 
+  .range-input {
+    @apply pointer-events-none absolute inset-x-0 top-0 h-8 w-full appearance-none bg-transparent;
+  }
+
+  .range-input::-webkit-slider-thumb {
+    @apply pointer-events-auto h-5 w-5 appearance-none rounded-full border-2 border-rose-500 bg-white shadow;
+  }
+
+  .range-input::-moz-range-thumb {
+    @apply pointer-events-auto h-5 w-5 rounded-full border-2 border-rose-500 bg-white shadow;
+  }
+
   .eyebrow {
     @apply text-xs font-bold uppercase tracking-[0.2em] text-rose-600;
   }

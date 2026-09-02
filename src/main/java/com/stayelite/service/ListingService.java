@@ -98,15 +98,21 @@ public class ListingService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             String propertyType,
+            List<String> propertyTypes,
             List<Long> amenities,
+            BigDecimal swLat,
+            BigDecimal swLng,
+            BigDecimal neLat,
+            BigDecimal neLng,
             int page,
             int size) {
 
         if (size <= 0) size = 20;
         if (page < 0) page = 0;
 
+        validateBounds(swLat, swLng, neLat, neLng);
         Pageable pageable = PageRequest.of(page, size);
-        Specification<Listing> spec = buildSearchSpecification(city, guests, minPrice, maxPrice, propertyType, amenities);
+        Specification<Listing> spec = buildSearchSpecification(city, guests, minPrice, maxPrice, propertyType, propertyTypes, amenities, swLat, swLng, neLat, neLng);
 
         Page<Listing> result = listingRepository.findAll(spec, pageable);
 
@@ -213,9 +219,19 @@ public class ListingService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             String propertyType,
-            List<Long> amenities) {
+            List<String> propertyTypes,
+            List<Long> amenities,
+            BigDecimal swLat,
+            BigDecimal swLng,
+            BigDecimal neLat,
+            BigDecimal neLng) {
 
-        Specification<Listing> spec = Specification.where(null);
+        Specification<Listing> spec = Specification.where((root, query, cb) -> cb.isTrue(root.get("isActive")));
+
+        if (swLat != null) spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("latitude"), swLat));
+        if (neLat != null) spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("latitude"), neLat));
+        if (swLng != null) spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("longitude"), swLng));
+        if (neLng != null) spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("longitude"), neLng));
 
         if (city != null && !city.isBlank()) {
             spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("city")), city.trim().toLowerCase()));
@@ -242,14 +258,33 @@ public class ListingService {
             }
         }
 
+        if (propertyTypes != null && !propertyTypes.isEmpty()) {
+            List<PropertyType> enumTypes = propertyTypes.stream().map(value -> {
+                try { return PropertyType.valueOf(value.toUpperCase(Locale.ROOT)); }
+                catch (IllegalArgumentException exception) { return null; }
+            }).filter(Objects::nonNull).toList();
+            if (!enumTypes.isEmpty()) spec = spec.and((root, query, cb) -> root.get("propertyType").in(enumTypes));
+        }
+
         if (amenities != null && !amenities.isEmpty()) {
             spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
                 var amenityJoin = root.join("listingAmenities", jakarta.persistence.criteria.JoinType.INNER);
                 return amenityJoin.get("amenity").get("id").in(amenities);
             });
         }
 
         return spec;
+    }
+
+    private void validateBounds(BigDecimal swLat, BigDecimal swLng, BigDecimal neLat, BigDecimal neLng) {
+        if (swLat == null && swLng == null && neLat == null && neLng == null) return;
+        if (swLat == null || swLng == null || neLat == null || neLng == null
+                || swLat.compareTo(neLat) > 0 || swLng.compareTo(neLng) > 0
+                || swLat.compareTo(BigDecimal.valueOf(-90)) < 0 || neLat.compareTo(BigDecimal.valueOf(90)) > 0
+                || swLng.compareTo(BigDecimal.valueOf(-180)) < 0 || neLng.compareTo(BigDecimal.valueOf(180)) > 0) {
+            throw new IllegalArgumentException("Invalid map bounds");
+        }
     }
 
     private List<UUID> findBookingsExcludingDates(LocalDate checkIn, LocalDate checkOut) {

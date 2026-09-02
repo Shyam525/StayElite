@@ -72,7 +72,12 @@ public class ListingController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String propertyType,
+            @RequestParam(required = false) List<String> propertyTypes,
             @RequestParam(required = false) List<Long> amenities,
+            @RequestParam(required = false) BigDecimal swLat,
+            @RequestParam(required = false) BigDecimal swLng,
+            @RequestParam(required = false) BigDecimal neLat,
+            @RequestParam(required = false) BigDecimal neLng,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
@@ -84,7 +89,12 @@ public class ListingController {
                 minPrice,
                 maxPrice,
                 propertyType,
+                propertyTypes,
                 amenities,
+                swLat,
+                swLng,
+                neLat,
+                neLng,
                 page,
                 size
         );

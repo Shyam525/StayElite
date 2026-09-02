@@ -47,6 +47,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=http://localhost:8080/api
             NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_ci_placeholder
+            NEXT_PUBLIC_MAPBOX_TOKEN=pk.test_ci_placeholder
           tags: stayelite/frontend:ci
       - uses: docker/build-push-action@v6
         with:
