@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ExplorePage } from "@/components/ExplorePage";
 import { Loader2 } from "lucide-react";
 
-export default function Home() {
+export default function ExploreAliasPage() {
   return (
     <Suspense
       fallback={

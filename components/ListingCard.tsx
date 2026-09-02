@@ -3,100 +3,154 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import type { ListingDetail } from "@/services/listingService";
+import type { ListingItem } from "@/types/listing";
 import { WishlistButton } from "@/components/WishlistButton";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { formatPrice, formatDateRange } from "@/lib/utils";
 
-const fallback = [
+const fallbackPhotos = [
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=80",
   "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80",
 ];
 
 interface ListingCardProps {
-  listing: ListingDetail;
+  listing: ListingItem | any;
   isSaved?: boolean;
+  displayTotalPrice?: boolean;
 }
 
-export function ListingCard({ listing, isSaved: isSavedProp }: ListingCardProps) {
-  const [index, setIndex] = useState(0);
-  const isWishlistedInStore = useWishlistStore((state) => state.isWishlisted(listing.id));
-  const isSaved = isSavedProp !== undefined ? isSavedProp || isWishlistedInStore : isWishlistedInStore;
+export function ListingCard({ listing, isSaved: isSavedProp, displayTotalPrice = false }: ListingCardProps) {
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
-  const images = listing.photoUrls?.length ? listing.photoUrls : fallback;
-  const image = images[index % images.length];
-  const src = image.startsWith("http")
-    ? image
-    : `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") || "http://localhost:8080"}${image}`;
+  const isWishlistedInStore = useWishlistStore((state) => state.isWishlisted(listing.id));
+  const isSaved = isSavedProp !== undefined ? isSavedProp : isWishlistedInStore;
+
+  const photos = listing.photoUrls?.length
+    ? listing.photoUrls
+    : listing.primaryPhotoUrl
+    ? [listing.primaryPhotoUrl]
+    : fallbackPhotos;
+
+  const price = Number(listing.pricePerNight || listing.basePricePerNight || 0);
+  const totalPrice = price * 5; // 5-night estimated stay
+
+  const handlePrevPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const handleNextPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentPhotoIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+  };
+
+  const isGuestFavorite =
+    listing.isGuestFavorite ||
+    (listing.averageRating && listing.averageRating >= 4.9 && (listing.reviewCount || 0) > 40);
 
   return (
-    <article className="group min-w-0">
-      <div className="relative aspect-[1.03] overflow-hidden rounded-2xl bg-slate-100">
+    <article className="group min-w-0 cursor-pointer">
+      {/* PHOTO SECTION (1:1 Aspect Ratio Square) */}
+      <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100 shadow-2xs">
         <Link href={`/listings/${listing.id}`} aria-label={`View ${listing.title}`}>
           <img
-            src={src}
+            src={photos[currentPhotoIndex % photos.length]}
             alt={listing.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </Link>
 
-        {/* Framer Motion Animated Wishlist Button */}
+        {/* TOP LEFT BADGE: Guest Favourite */}
+        {isGuestFavorite && (
+          <span className="absolute left-3 top-3 z-10 rounded-full bg-white/95 backdrop-blur-xs px-3 py-1 text-[11px] font-bold text-[#222222] shadow-sm">
+            Guest favourite
+          </span>
+        )}
+
+        {/* TOP RIGHT: Wishlist Button */}
         <div className="absolute right-3 top-3 z-10">
           <WishlistButton listingId={listing.id} isSaved={isSaved} size="sm" />
         </div>
 
-        {listing.averageRating && listing.averageRating > 4.8 && (
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 backdrop-blur-xs px-3 py-1 text-xs font-bold text-slate-800 shadow-sm">
-            Guest favorite
-          </span>
-        )}
-
-        {images.length > 1 && (
+        {/* Hover Arrow Controls */}
+        {photos.length > 1 && (
           <>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setIndex((index - 1 + images.length) % images.length);
-              }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white z-10"
+              onClick={handlePrevPhoto}
+              aria-label="Previous photo"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-800 opacity-0 shadow-md transition group-hover:opacity-100 hover:bg-white z-10"
             >
-              <ChevronLeft className="h-4 w-4 text-slate-700" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setIndex((index + 1) % images.length);
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white z-10"
+              onClick={handleNextPhoto}
+              aria-label="Next photo"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-800 opacity-0 shadow-md transition group-hover:opacity-100 hover:bg-white z-10"
             >
-              <ChevronRight className="h-4 w-4 text-slate-700" />
+              <ChevronRight className="h-4 w-4" />
             </button>
           </>
         )}
+
+        {/* Bottom Pagination Dot Indicators */}
+        {photos.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 z-10">
+            {photos.slice(0, 5).map((_photo: string, idx: number) => (
+              <span
+                key={idx}
+                className={`h-1.5 rounded-full transition-all duration-200 ${
+                  idx === currentPhotoIndex % photos.length
+                    ? "w-4 bg-white"
+                    : "w-1.5 bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <Link href={`/listings/${listing.id}`} className="block pt-3">
-        <div className="flex justify-between gap-2">
-          <p className="truncate font-semibold text-slate-900">
+      {/* INFO SECTION */}
+      <Link href={`/listings/${listing.id}`} className="block pt-3 space-y-0.5">
+        {/* Row 1: City, Country & Rating */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="truncate text-sm font-semibold text-[#222222]">
             {[listing.city, listing.country].filter(Boolean).join(", ") || listing.title}
           </p>
           {listing.averageRating ? (
-            <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-slate-900">
-              <Star className="h-3.5 w-3.5 fill-slate-900 text-slate-900" />
-              {listing.averageRating.toFixed(1)}
+            <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-[#222222]">
+              <Star className="h-3.5 w-3.5 fill-[#222222] text-[#222222]" />
+              {Number(listing.averageRating).toFixed(1)}
             </span>
           ) : null}
         </div>
-        <p className="mt-1 truncate text-sm text-slate-500">
-          {listing.propertyType || "Private stay"} · {listing.bedrooms} bedrooms
+
+        {/* Row 2: Property Type */}
+        <p className="truncate text-sm text-[#717171]">
+          {listing.propertyType || "Entire villa"}
         </p>
-        <p className="mt-2 text-sm text-slate-700">
-          <strong className="font-bold text-slate-950">
-            ${Number(listing.basePricePerNight || 0).toLocaleString()}
-          </strong>{" "}
-          night
+
+        {/* Row 3: Dates */}
+        <p className="truncate text-sm text-[#717171]">
+          {listing.availableDates || formatDateRange()}
         </p>
+
+        {/* Row 4: Pricing */}
+        <div className="pt-1">
+          <p className="text-sm text-[#222222]">
+            <strong className="font-bold">{formatPrice(price)}</strong>{" "}
+            <span className="text-sm font-normal text-[#717171]">night</span>
+          </p>
+          {displayTotalPrice && (
+            <p className="text-xs text-[#717171] underline font-medium">
+              {formatPrice(totalPrice)} total before taxes
+            </p>
+          )}
+        </div>
       </Link>
     </article>
   );
@@ -105,10 +159,11 @@ export function ListingCard({ listing, isSaved: isSavedProp }: ListingCardProps)
 export function ListingSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="aspect-[1.03] rounded-2xl bg-slate-200" />
+      <div className="aspect-square rounded-2xl bg-slate-200" />
       <div className="mt-3 h-4 w-3/4 rounded bg-slate-200" />
-      <div className="mt-2 h-3 w-1/2 rounded bg-slate-200" />
-      <div className="mt-3 h-4 w-1/3 rounded bg-slate-200" />
+      <div className="mt-1.5 h-3 w-1/2 rounded bg-slate-200" />
+      <div className="mt-1.5 h-3 w-1/3 rounded bg-slate-200" />
+      <div className="mt-2.5 h-4 w-1/4 rounded bg-slate-200" />
     </div>
   );
 }
