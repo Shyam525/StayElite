@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronDown, Search, UserRound } from "lucide-react";
+import { ChevronDown, Search, Heart } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 export default function Header() {
   const router = useRouter();
@@ -32,6 +33,9 @@ export default function Header() {
           <Link href="/explore" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
             Explore
           </Link>
+          <Link href="/wishlists" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            Wishlists
+          </Link>
           <Link href="/bookings" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
             Bookings
           </Link>
@@ -44,9 +48,9 @@ export default function Header() {
           <button className="hidden rounded-full p-2 text-slate-600 transition hover:bg-slate-100 sm:inline-flex">
             <Search className="h-4 w-4" />
           </button>
-          <button className="hidden rounded-full p-2 text-slate-600 transition hover:bg-slate-100 sm:inline-flex">
-            <Bell className="h-4 w-4" />
-          </button>
+
+          {/* Interactive Notifications Bell Dropdown with Live Polling */}
+          <NotificationDropdown />
 
           {isAuthenticated && user ? (
             <div className="relative flex items-center gap-3 rounded-full border border-slate-200 bg-white px-2 py-1.5 shadow-sm">
@@ -63,6 +67,13 @@ export default function Header() {
                 <div className="flex min-w-[180px] flex-col">
                   <Link href="/host/dashboard" className="rounded-xl px-3 py-2 text-sm font-semibold text-[#FF385C] hover:bg-slate-100">
                     Host Dashboard
+                  </Link>
+                  <Link href="/wishlists" className="rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 flex items-center justify-between">
+                    <span>Wishlists</span>
+                    <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
+                  </Link>
+                  <Link href="/notifications" className="rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    Notifications
                   </Link>
                   <Link href="/profile" className="rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                     Profile
