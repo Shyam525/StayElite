@@ -23,6 +23,12 @@ export type MessageItem = {
   createdAt: string;
 };
 
+export type UserPresence = {
+  isOnline: boolean;
+  lastSeen: string;
+  timestamp?: number;
+};
+
 function unwrap<T>(response: { data?: { data?: T } | T }) {
   const body = response.data;
   return (body && typeof body === "object" && "data" in body ? body.data : body) as T;
@@ -42,4 +48,13 @@ export async function markConversationRead(key: string) {
 
 export async function sendMessage(payload: { receiverId: string; listingId: string; content: string }) {
   return unwrap<MessageItem>(await api.post("/messages", payload));
+}
+
+export async function getUserPresence(userId: string): Promise<UserPresence> {
+  try {
+    const res = await api.get(`/messages/presence/${userId}`);
+    return unwrap<UserPresence>(res);
+  } catch {
+    return { isOnline: true, lastSeen: "Online" };
+  }
 }
