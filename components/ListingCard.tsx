@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import type { ListingDetail } from "@/services/listingService";
+import { WishlistButton } from "@/components/WishlistButton";
 import { useWishlistStore } from "@/store/wishlistStore";
 
 const fallback = [
@@ -11,22 +12,21 @@ const fallback = [
   "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=80",
 ];
 
-export function ListingCard({ listing }: { listing: ListingDetail }) {
+interface ListingCardProps {
+  listing: ListingDetail;
+  isSaved?: boolean;
+}
+
+export function ListingCard({ listing, isSaved: isSavedProp }: ListingCardProps) {
   const [index, setIndex] = useState(0);
-  const isWishlisted = useWishlistStore((state) => state.isWishlisted(listing.id));
-  const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
+  const isWishlistedInStore = useWishlistStore((state) => state.isWishlisted(listing.id));
+  const isSaved = isSavedProp !== undefined ? isSavedProp || isWishlistedInStore : isWishlistedInStore;
 
   const images = listing.photoUrls?.length ? listing.photoUrls : fallback;
   const image = images[index % images.length];
   const src = image.startsWith("http")
     ? image
     : `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") || "http://localhost:8080"}${image}`;
-
-  const handleHeartClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    void toggleWishlist(listing);
-  };
 
   return (
     <article className="group min-w-0">
@@ -39,21 +39,10 @@ export function ListingCard({ listing }: { listing: ListingDetail }) {
           />
         </Link>
 
-        {/* Heart Wishlist Button */}
-        <button
-          type="button"
-          onClick={handleHeartClick}
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          className="absolute right-3 top-3 rounded-full p-2 text-white drop-shadow-md transition duration-200 hover:scale-110 active:scale-90"
-        >
-          <Heart
-            className={`h-5 w-5 transition-colors ${
-              isWishlisted
-                ? "fill-rose-500 text-rose-500"
-                : "fill-black/30 text-white hover:fill-black/50"
-            }`}
-          />
-        </button>
+        {/* Framer Motion Animated Wishlist Button */}
+        <div className="absolute right-3 top-3 z-10">
+          <WishlistButton listingId={listing.id} isSaved={isSaved} size="sm" />
+        </div>
 
         {listing.averageRating && listing.averageRating > 4.8 && (
           <span className="absolute left-3 top-3 rounded-full bg-white/95 backdrop-blur-xs px-3 py-1 text-xs font-bold text-slate-800 shadow-sm">
@@ -69,7 +58,7 @@ export function ListingCard({ listing }: { listing: ListingDetail }) {
                 e.preventDefault();
                 setIndex((index - 1 + images.length) % images.length);
               }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white"
+              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white z-10"
             >
               <ChevronLeft className="h-4 w-4 text-slate-700" />
             </button>
@@ -79,7 +68,7 @@ export function ListingCard({ listing }: { listing: ListingDetail }) {
                 e.preventDefault();
                 setIndex((index + 1) % images.length);
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-1.5 opacity-0 shadow transition group-hover:opacity-100 hover:bg-white z-10"
             >
               <ChevronRight className="h-4 w-4 text-slate-700" />
             </button>

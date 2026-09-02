@@ -7,17 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "wishlists", uniqueConstraints = {
-    @UniqueConstraint(name = "uq_wishlist_user_listing", columnNames = {"user_id", "listing_id"})
-})
+@Table(name = "wishlist_collections")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Wishlist {
+public class WishlistCollection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,9 +28,17 @@ public class Wishlist {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "listing_id", nullable = false)
-    private Listing listing;
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @ManyToMany
+    @JoinTable(
+        name = "wishlist_collection_items",
+        joinColumns = @JoinColumn(name = "collection_id"),
+        inverseJoinColumns = @JoinColumn(name = "listing_id")
+    )
+    @Builder.Default
+    private List<Listing> listings = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

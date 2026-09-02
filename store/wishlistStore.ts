@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
-import { getLocalWishlistIds, toggleWishlistApi, getWishlistApi } from "@/services/wishlistService";
+import { toggleWishlist as toggleWishlistApi, getUserWishlist as getWishlistApi } from "@/services/wishlistService";
 import type { ListingDetail } from "@/services/listingService";
 
 interface WishlistState {
@@ -13,7 +13,7 @@ interface WishlistState {
 }
 
 export const useWishlistStore = create<WishlistState>((set, get) => ({
-  wishlistIds: new Set<string>(typeof window !== "undefined" ? getLocalWishlistIds() : ["prop-101", "prop-103"]),
+  wishlistIds: new Set<string>(["prop-101", "prop-103"]),
   wishlistedListings: [],
   isLoading: false,
 
@@ -54,7 +54,6 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
     try {
       await toggleWishlistApi(listingId);
     } catch (error) {
-      // Revert state if failed
       console.error("Wishlist sync error:", error);
       toast.error("Failed to update wishlist. Reverting change.");
       set({ wishlistIds, wishlistedListings });
@@ -65,15 +64,9 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
     set({ isLoading: true });
     try {
       const data = await getWishlistApi();
-      const ids = new Set(data.map((item) => item.id));
-
-      // Also merge any local storage IDs if data returned
-      if (typeof window !== "undefined") {
-        getLocalWishlistIds().forEach((id) => ids.add(id));
-      }
+      const ids = new Set(data.map((item) => item.listingId));
 
       set({
-        wishlistedListings: data,
         wishlistIds: ids,
         isLoading: false,
       });
