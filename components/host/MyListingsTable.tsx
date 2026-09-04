@@ -278,9 +278,9 @@ export function MyListingsTable({
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <th key={cell.id} className="py-3.5 px-3 first:pl-1 last:pr-1 font-normal">
+                    <td key={cell.id} className="py-3.5 px-3 first:pl-1 last:pr-1 font-normal">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </th>
+                    </td>
                   ))}
                 </tr>
               ))

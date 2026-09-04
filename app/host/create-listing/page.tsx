@@ -163,7 +163,7 @@ export default function CreateListingPage() {
       const listingId = created?.id;
       if (listingId && files.length) await uploadListingPhotos(listingId, files);
       resetDraft();
-      router.push("/host/listings?created=1");
+      router.push("/host/dashboard?created=1");
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "We couldn't publish your listing. Please try again.");
     } finally {

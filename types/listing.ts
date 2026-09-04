@@ -1,29 +1,47 @@
-export interface ListingItem {
+export type PropertyType =
+  | 'APARTMENT'
+  | 'HOUSE'
+  | 'VILLA'
+  | 'CABIN'
+  | 'STUDIO'
+  | 'LOFT'
+  | 'TREEHOUSE'
+  | 'BOAT'
+  | (string & {});
+
+export interface ListingResponse {
   id: string;
   title: string;
-  description?: string;
   city: string;
+  state?: string;
   country: string;
-  primaryPhotoUrl?: string;
-  photoUrls: string[];
-  pricePerNight: number;
-  averageRating?: number;
-  reviewCount?: number;
-  propertyType: string;
-  isSaved?: boolean;
-  isGuestFavorite?: boolean;
+  propertyType: PropertyType | string;
+  category: string;
+  basePricePerNight: number;
+  cleaningFee?: number;
+  maxGuests: number;
+  bedrooms: number;
+  bathrooms: number;
+  averageRating: number;
+  reviewCount: number;
+  isGuestFavorite: boolean;
+  isSuperhost: boolean;
+  photos: string[];
+  amenities: any[];
+  latitude?: number;
+  longitude?: number;
   availableDates?: string;
-  bedrooms?: number;
-  beds?: number;
-  bathrooms?: number;
-  maxGuests?: number;
-  amenities?: string[];
+  isActive?: boolean;
+  hostId?: string;
   hostName?: string;
-  isSuperhost?: boolean;
-  createdAt?: string;
+  hostAvatarUrl?: string;
+  // Compatibility fields
+  pricePerNight?: number;
+  primaryPhotoUrl?: string;
+  photoUrls?: string[];
 }
 
-export interface ListingFilterParams {
+export interface ListingFilters {
   city?: string;
   checkIn?: string;
   checkOut?: string;
@@ -31,19 +49,25 @@ export interface ListingFilterParams {
   category?: string;
   minPrice?: number;
   maxPrice?: number;
+  propertyType?: PropertyType | string;
   bedrooms?: number;
-  beds?: number;
   bathrooms?: number;
-  propertyType?: string;
-  amenities?: string;
+  amenities?: any[];
   page?: number;
+  size?: number;
   limit?: number;
 }
 
-export interface ListingPaginatedResponse {
-  items: ListingItem[];
-  page: number;
-  limit: number;
+export interface PaginatedListings {
+  listings: ListingResponse[];
   total: number;
-  hasMore: boolean;
+  page: number;
+  totalPages: number;
+  hasMore?: boolean;
+  items?: ListingResponse[];
 }
+
+// Backward compatibility type aliases
+export type ListingItem = ListingResponse;
+export type ListingFilterParams = ListingFilters;
+export type ListingPaginatedResponse = PaginatedListings;

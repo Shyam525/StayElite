@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import Header from "@/components/Header";
-import { Providers } from "@/components/Providers";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,7 +13,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "StayElite — Find Your Perfect Stay",
-  description: "Discover unique homes, apartments, luxury villas, and experiences around the world. Book with confidence on StayElite.",
+  description: "Discover unique luxury homes, apartments, and experiences around the world. Book with confidence on StayElite.",
   keywords: "vacation rentals, luxury villas, home stays, travel, stayelite, airbnb clone",
   openGraph: {
     title: "StayElite — Find Your Perfect Stay",
@@ -41,7 +42,9 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} scroll-smooth`}>
       <body className="min-h-screen flex flex-col bg-white text-secondary font-sans antialiased">
         <Providers>
-          <Header />
+          <Suspense fallback={<div className="h-20 w-full bg-white border-b border-gray-200" />}>
+            <Header />
+          </Suspense>
           <div className="flex-1 w-full">{children}</div>
         </Providers>
       </body>

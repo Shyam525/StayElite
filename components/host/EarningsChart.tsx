@@ -1,18 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
-  Area,
-  AreaChart,
 } from "recharts";
-import { TrendingUp, DollarSign, Calendar } from "lucide-react";
+import { TrendingUp, Calendar } from "lucide-react";
 import type { EarningsMonthData } from "@/types/host";
 
 interface EarningsChartProps {
@@ -21,6 +19,11 @@ interface EarningsChartProps {
 
 export function EarningsChart({ data }: EarningsChartProps) {
   const [timeframe, setTimeframe] = useState<"6m" | "ytd">("6m");
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const totalEarnings = data.reduce((acc, d) => acc + d.earnings, 0);
   const avgMonthly = Math.round(totalEarnings / (data.length || 1));
@@ -66,57 +69,63 @@ export function EarningsChart({ data }: EarningsChartProps) {
         </div>
       </div>
 
-      <div className="mt-6 h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FF385C" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#FF385C" stopOpacity={0.0} />
-              </linearGradient>
-            </defs>
+      <div className="mt-6 h-[300px] w-full min-w-0">
+        {isMounted ? (
+          <ResponsiveContainer width="100%" height={300} minWidth={0} debounce={100}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#FF385C" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#FF385C" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
 
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
 
-            <XAxis
-              dataKey="shortMonth"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#64748B", fontSize: 12, fontWeight: 500 }}
-              dy={10}
-            />
+              <XAxis
+                dataKey="shortMonth"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#64748B", fontSize: 12, fontWeight: 500 }}
+                dy={10}
+              />
 
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#64748B", fontSize: 12 }}
-              tickFormatter={(value) => `$${value / 1000}k`}
-            />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#64748B", fontSize: 12 }}
+                tickFormatter={(value) => `$${value / 1000}k`}
+              />
 
-            <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} />
 
-            <Area
-              type="monotone"
-              dataKey="earnings"
-              stroke="#FF385C"
-              strokeWidth={3}
-              fillOpacity={1}
-              fill="url(#earningsGradient)"
-              activeDot={{
-                r: 6,
-                fill: "#FF385C",
-                stroke: "#FFFFFF",
-                strokeWidth: 2,
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+              <Area
+                type="monotone"
+                dataKey="earnings"
+                stroke="#FF385C"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#earningsGradient)"
+                activeDot={{
+                  r: 6,
+                  fill: "#FF385C",
+                  stroke: "#FFFFFF",
+                  strokeWidth: 2,
+                }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-slate-50/50 rounded-2xl text-xs text-slate-400">
+            Loading chart...
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload }: any) {
   if (active && payload && payload.length) {
     const data: EarningsMonthData = payload[0].payload;
     return (
